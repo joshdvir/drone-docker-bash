@@ -1,13 +1,13 @@
 #!/bin/bash
 
 if [ -z ${PLUGIN_DRY_RUN} ]; then
-  $PLUGIN_DRY_RUN=false
+  $PLUGIN_DRY_RUN="false"
 fi
 
 if [ -z ${PLUGIN_KEEP} ]; then
-  keep=true
+  keep="true"
 else
-  keep=false
+  keep="false"
 fi
 
 if [ -z ${DRONE_COMMIT_SHA} ]; then
@@ -16,7 +16,7 @@ fi
 
 
 # Login env's
-if [ -z ${DOCKER_REGISTRY} ]; then
+if [ -z ${PLUGIN_REGISTRY} ]; then
   echo "missing registry"
   exit 1
 fi
@@ -127,21 +127,21 @@ fi
 echo $PLUGIN_TAGS
 
 # Deamon
-if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
+if [ "$PLUGIN_DAEMON_OFF" != "true" ] ; then
   /usr/local/bin/dockerd $deamon_envs
 fi
 
 # Login to Registry
-/usr/local/bin/docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $DOCKER_REGISTRY
+/usr/local/bin/docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY
 
 # Docker build image
 /usr/local/bin/docker build -t $DOCKER_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
-if [ "$PLUGIN_DRY_RUN" != true ] ; then
+if [ "$PLUGIN_DRY_RUN" != "true" ] ; then
   # Docker push
   /usr/local/bin/docker push $DOCKER_REPO
 fi
 
-if [ "$keep" = true ] ; then
+if [ "$keep" = "true" ] ; then
   /usr/local/bin/docker rmi $(/usr/local/bin/docker images -f reference=${DOCKER_REPO}:* -q | sed 1,${PLUGIN_KEEP}d) | exit 0
 fi
