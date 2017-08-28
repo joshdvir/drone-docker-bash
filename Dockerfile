@@ -1,4 +1,4 @@
-FROM docker:17.05-ce-dind
+FROM docker:17.05.0-ce-dind
 
 RUN apk add --update --no-cache \
     curl \

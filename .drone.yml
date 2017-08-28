@@ -7,6 +7,6 @@ pipeline:
       - "production"
     force_tag: true
     file: Dockerfile
-    secrets: [ docker_username, docker_password, docker_email ]
+    secrets: [ docker_username, docker_password ]
     when:
       branch: [master]
