@@ -149,6 +149,8 @@ do
   fi
 done
 
+/usr/local/bin/docker rmi $PLUGIN_REPO:$DRONE_COMMIT_SHA
+
 echo "$keep"
 if [ "$keep" = true ] ; then
   echo "docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d)"
