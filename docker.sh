@@ -131,11 +131,9 @@ if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
 fi
 
 # Login to Registry
-echo "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY"
 /usr/local/bin/docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY
 
 # Docker build image
-echo "docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT"
 /usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
 echo $PLUGIN_TAGS
