@@ -4,10 +4,10 @@ if [ -z ${PLUGIN_DRY_RUN} ]; then
   PLUGIN_DRY_RUN=false
 fi
 
-if [ -z ${PLUGIN_KEEP} ]; then
-  keep=true
-else
+if [ ! -z ${PLUGIN_KEEP} ]; then
   keep=false
+else
+  keep=true
 fi
 
 if [ -z ${DRONE_COMMIT_SHA} ]; then
