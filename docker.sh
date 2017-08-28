@@ -128,7 +128,7 @@ echo $PLUGIN_TAGS
 
 # Deamon
 if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
-  /usr/local/bin/dockerd $deamon_envs
+  /usr/local/bin/dockerd $deamon_envs &
 fi
 
 # Login to Registry
