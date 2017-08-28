@@ -4,7 +4,7 @@ if [ -z ${PLUGIN_DRY_RUN} ]; then
   PLUGIN_DRY_RUN=false
 fi
 
-if [ ! -z ${PLUGIN_KEEP} ]; then
+if [ -z ${PLUGIN_KEEP} ]; then
   keep=false
 else
   keep=true
@@ -126,25 +126,32 @@ fi
 
 # Deamon
 if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
+  echo "/usr/local/bin/dockerd $deamon_envs"
   /usr/local/bin/dockerd $deamon_envs &
 fi
 
 # Login to Registry
+echo "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY"
 /usr/local/bin/docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY
 
 # Docker build image
+echo "docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT"
 /usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
+echo $PLUGIN_TAGS
 IFS=',' read -r -a tags <<< "$PLUGIN_TAGS"
 for tag in "${tags[@]}"
 do
+  echo "docker tag $PLUGIN_REPO:$DRONE_COMMIT_SHA $PLUGIN_REPO:$tag"
   /usr/local/bin/docker tag $PLUGIN_REPO:$DRONE_COMMIT_SHA $PLUGIN_REPO:$tag
   if [ "$PLUGIN_DRY_RUN" != true ] ; then
     # Docker push
+    echo "docker push $PLUGIN_REPO:$tag"
     /usr/local/bin/docker push $PLUGIN_REPO:$tag
   fi
 done
 
+echo "$keep"
 if [ "$keep" = true ] ; then
   /usr/local/bin/docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d) | exit 0
 fi
