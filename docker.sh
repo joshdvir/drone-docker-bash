@@ -126,7 +126,6 @@ fi
 
 # Deamon
 if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
-  echo "/usr/local/bin/dockerd $deamon_envs"
   /usr/local/bin/dockerd $deamon_envs &
 fi
 
@@ -136,7 +135,6 @@ fi
 # Docker build image
 /usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
-echo $PLUGIN_TAGS
 IFS=',' read -r -a tags <<< "$PLUGIN_TAGS"
 for tag in "${tags[@]}"
 do
