@@ -1,0 +1,12 @@
+pipeline:
+  docker:
+    image: plugins/docker:latest
+    repo: joshdvir/drone-docker-bash
+    tag:
+      - "${DRONE_BUILD_NUMBER}"
+      - "production"
+    force_tag: true
+    file: Dockerfile
+    secrets: [ docker_username, docker_password, docker_email ]
+    when:
+      branch: [master]
