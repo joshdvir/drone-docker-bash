@@ -124,8 +124,6 @@ fi
 /usr/local/bin/docker version
 /usr/local/bin/docker info
 
-echo $PLUGIN_TAGS
-
 # Deamon
 if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
   /usr/local/bin/dockerd $deamon_envs &
@@ -137,10 +135,15 @@ fi
 # Docker build image
 /usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
-if [ "$PLUGIN_DRY_RUN" != true ] ; then
-  # Docker push
-  /usr/local/bin/docker push $PLUGIN_REPO
-fi
+IFS=',' read -r -a tags <<< "$PLUGIN_TAGS"
+for tag in "${tags[@]}"
+do
+  /usr/local/bin/docker tag $PLUGIN_REPO:$DRONE_COMMIT_SHA $PLUGIN_REPO:$tag
+  if [ "$PLUGIN_DRY_RUN" != true ] ; then
+    # Docker push
+    /usr/local/bin/docker push $PLUGIN_REPO:$tag
+  fi
+done
 
 if [ "$keep" = true ] ; then
   /usr/local/bin/docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d) | exit 0
