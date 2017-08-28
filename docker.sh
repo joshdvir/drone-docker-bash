@@ -1,17 +1,17 @@
 #!/bin/bash
 
 if [ -z ${PLUGIN_DRY_RUN} ]; then
-  $PLUGIN_DRY_RUN="false"
+  PLUGIN_DRY_RUN=false
 fi
 
 if [ -z ${PLUGIN_KEEP} ]; then
-  keep="true"
+  keep=true
 else
-  keep="false"
+  keep=false
 fi
 
 if [ -z ${DRONE_COMMIT_SHA} ]; then
-  $DRONE_COMMIT_SHA="00000000"
+  DRONE_COMMIT_SHA="00000000"
 fi
 
 
@@ -39,7 +39,7 @@ fi
 
 # Deamon env's
 if [ -z ${PLUGIN_STORAGE_PATH} ]; then
-  $PLUGIN_STORAGE_PATH="/var/lib/docker"
+  PLUGIN_STORAGE_PATH="/var/lib/docker"
 fi
 
 deamon_envs="-g $PLUGIN_STORAGE_PATH"
@@ -80,21 +80,21 @@ if [ ! -z ${PLUGIN_EXPERIMENTAL} ]; then
 fi
 
 if [ ! -z ${PLUGIN_DAEMON_OFF} ]; then
-  $PLUGIN_DAEMON_OFF=false
+  PLUGIN_DAEMON_OFF=false
 fi
 
 
 # Build env's
 if [ -z ${PLUGIN_DOCKERFILE} ]; then
-  $PLUGIN_DOCKERFILE="Dockerfile"
+  PLUGIN_DOCKERFILE="Dockerfile"
 fi
 
 if [ -z ${PLUGIN_CONTEXT} ]; then
-  $PLUGIN_CONTEXT="."
+  PLUGIN_CONTEXT="."
 fi
 
 if [ -z ${PLUGIN_TAGS} ]; then
-  $PLUGIN_TAGS="latest"
+  PLUGIN_TAGS="latest"
 fi
 
 build_envs=""
@@ -114,7 +114,7 @@ if [ ! -z ${PLUGIN_COMPRESS} ]; then
   build_envs="$build_envs --compress"
 fi
 
-if [ -z ${DOCKER_REPO} ]; then
+if [ -z ${PLUGIN_REPO} ]; then
   echo "missing repo"
   exit 1
 fi
@@ -127,7 +127,7 @@ fi
 echo $PLUGIN_TAGS
 
 # Deamon
-if [ "$PLUGIN_DAEMON_OFF" != "true" ] ; then
+if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
   /usr/local/bin/dockerd $deamon_envs
 fi
 
@@ -135,13 +135,13 @@ fi
 /usr/local/bin/docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY
 
 # Docker build image
-/usr/local/bin/docker build -t $DOCKER_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
+/usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
-if [ "$PLUGIN_DRY_RUN" != "true" ] ; then
+if [ "$PLUGIN_DRY_RUN" != true ] ; then
   # Docker push
-  /usr/local/bin/docker push $DOCKER_REPO
+  /usr/local/bin/docker push $PLUGIN_REPO
 fi
 
-if [ "$keep" = "true" ] ; then
-  /usr/local/bin/docker rmi $(/usr/local/bin/docker images -f reference=${DOCKER_REPO}:* -q | sed 1,${PLUGIN_KEEP}d) | exit 0
+if [ "$keep" = true ] ; then
+  /usr/local/bin/docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d) | exit 0
 fi
