@@ -154,4 +154,4 @@ if [ "$keep" = true ] ; then
   /usr/local/bin/docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d) | exit 0
 fi
 
-/usr/local/bin/docker system prune -f | exit 0
+# /usr/local/bin/docker system prune -f | exit 0
