@@ -16,10 +16,10 @@ fi
 
 
 # Login env's
-if [ -z ${PLUGIN_REGISTRY} ]; then
-  echo "missing registry"
-  exit 1
-fi
+# if [ -z ${PLUGIN_REGISTRY} ]; then
+#   echo "missing registry"
+#   exit 1
+# fi
 
 if [ -z ${DOCKER_USERNAME} ]; then
   echo "missing username"
