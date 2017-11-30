@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 if [ -z ${PLUGIN_DRY_RUN} ]; then
   PLUGIN_DRY_RUN=false
