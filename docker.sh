@@ -130,17 +130,19 @@ if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
   /usr/local/bin/dockerd $deamon_envs &
 fi
 
+timestamp=$(date +%s)
+
 # Login to Registry
 /usr/local/bin/docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY
 
 # Docker build image
-/usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
+/usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
 IFS=',' read -r -a tags <<< "$PLUGIN_TAGS"
 for tag in "${tags[@]}"
 do
-  echo "docker tag $PLUGIN_REPO:$DRONE_COMMIT_SHA $PLUGIN_REPO:$tag"
-  /usr/local/bin/docker tag $PLUGIN_REPO:$DRONE_COMMIT_SHA $PLUGIN_REPO:$tag
+  echo "docker tag $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp $PLUGIN_REPO:$tag"
+  /usr/local/bin/docker tag $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp $PLUGIN_REPO:$tag
   if [ "$PLUGIN_DRY_RUN" != true ] ; then
     # Docker push
     echo "docker push $PLUGIN_REPO:$tag"
@@ -148,7 +150,7 @@ do
   fi
 done
 
-/usr/local/bin/docker rmi $PLUGIN_REPO:$DRONE_COMMIT_SHA
+/usr/local/bin/docker rmi $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp
 
 if [ "$keep" = true ] ; then
   echo "docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d)"
