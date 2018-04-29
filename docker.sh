@@ -153,8 +153,10 @@ done
 /usr/local/bin/docker rmi $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp
 
 if [ "$keep" = true ] ; then
-  echo "docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d)"
+  echo "docker rmi $(docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d)"
   /usr/local/bin/docker rmi $(/usr/local/bin/docker images -f reference=${PLUGIN_REPO}:* -q | sed 1,${PLUGIN_KEEP}d) | exit 0
 fi
 
+echo "docker rmi -f $(docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}')"
+/usr/local/bin/docker rmi -f $(/usr/local/bin/docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}') | exit 0
 # /usr/local/bin/docker system prune -f | exit 0
