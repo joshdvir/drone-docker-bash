@@ -130,7 +130,8 @@ if [ "$PLUGIN_DAEMON_OFF" != true ] ; then
   /usr/local/bin/dockerd $deamon_envs &
 fi
 
-timestamp=$(date +%s)
+# timestamp=$(date +%s)
+timestamp=$(cat $PLUGIN_DOCKERFILE | md5sum | awk '{print $1}')
 
 # Login to Registry
 /usr/local/bin/docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $login_envs $PLUGIN_REGISTRY
