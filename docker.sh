@@ -178,4 +178,5 @@ fi
 
 echo "docker rmi -f $(docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}')"
 /usr/local/bin/docker rmi -f $(/usr/local/bin/docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}') | exit 0
+echo "docker system prune -f"
 /usr/local/bin/docker system prune -f | exit 0
