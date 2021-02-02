@@ -140,7 +140,7 @@ timestamp=$(cat $PLUGIN_DOCKERFILE | md5sum | awk '{print $1}')
 /usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
 # If TWISTLOCK_USER and TWISTLOCK_PASSWORD is set, then download twistlock cli and scan for vulnerabilities in the image
-if [ -z ${TWISTLOCK_USER} && -z ${TWISTLOCK_PASSWORD} && -z ${PRISMA_CONSOLE_URL} ]; then
+if [[ ! -z "${TWISTLOCK_USER}" && ! -z "${TWISTLOCK_PASSWORD}" && ! -z "${PRISMA_CONSOLE_URL}" ]]; then
     echo "[INFO]: Getting Auth token for $TWISTLOCK_USER"
     token=$(curl -s -H "Content-Type: application/json" -d "{\"username\":\"$TWISTLOCK_USER\", \"password\":\"$TWISTLOCK_PASSWORD\"}" "$PRISMA_CONSOLE_URL/api/v1/authenticate")
     token=$(echo "$token" | jq -r ".token")
