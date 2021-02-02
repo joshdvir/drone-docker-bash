@@ -1,13 +1,42 @@
 pipeline:
+#   docker:
+#     image: plugins/docker:latest
+#     repo: joshdvir/drone-docker-bash
+#     tag:
+#       - "17.05"
+#       - "17"
+#       - "latest"
+#     force_tag: true
+#     file: Dockerfile
+#     secrets: [ docker_username, docker_password ]
+#     when:
+#       branch: [master]
+
+  export_secrets:
+    image: docker.twistbioscience-staging.com/devops_slave_dind
+    pull: true
+    commands:
+      - echo "export TWISTLOCK_USER=$${PRISMA_ACCESS_KEY}" > twistlock_secret
+      - echo "export TWISTLOCK_PASSWORD=$${PRISMA_SECRET_ACCESS_KEY}" >> twistlock_secret
+      - echo "export PRISMA_CONSOLE_URL=$${PRISMA_CONSOLE_URL}" >> twistlock_secret
+    secrets: [ prisma_console_url, prisma_access_key, prisma_secret_access_key ]
+    when:
+      branch: [master, prisma]
+
   docker:
-    image: plugins/docker:latest
-    repo: joshdvir/drone-docker-bash
+    image: docker.twistbioscience-staging.com/drone-docker-buildkit:latest
+    deamon_off: true
+    registry: docker.twistbioscience-staging.com
+    repo: docker.twistbioscience-staging.com/drone-docker-bash
     tag:
-      - "17.05"
-      - "17"
+      - "${DRONE_COMMIT_BRANCH}"
       - "latest"
     force_tag: true
-    file: Dockerfile
-    secrets: [ docker_username, docker_password ]
+    file: Dockerfile.BuildKit
+    secret_arg: twistlock_secret
+    secrets: [ docker_username, docker_password, prisma_console_url, prisma_access_key, prisma_secret_access_key ]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     when:
-      branch: [master]
+      branch: [master, prisma]
+
