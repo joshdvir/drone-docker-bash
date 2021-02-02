@@ -177,6 +177,16 @@ if [ "$keep" = true ] ; then
 fi
 
 echo "docker rmi -f $(docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}')"
-/usr/local/bin/docker rmi -f $(/usr/local/bin/docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}')
+images=($(/usr/local/bin/docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}'))
+for image in "${images[@]}"
+do
+  /usr/local/bin/docker rmi -f $image
+done
+echo "docker rmi $(/usr/local/bin/docker images -a --filter dangling=true -q)"
+images=($(/usr/local/bin/docker images -a --filter dangling=true -q))
+for image in "${images[@]}"
+do
+  /usr/local/bin/docker rmi -f $image
+done
 echo "docker system prune -f"
 /usr/local/bin/docker system prune -f | exit 0
