@@ -147,7 +147,8 @@ if [[ ! -z "${TWISTLOCK_USER}" && ! -z "${TWISTLOCK_PASSWORD}" && ! -z "${PRISMA
     echo "[INFO]: Downloading twistcli tool from $PRISMA_CONSOLE_URL"
     curl -s -L -k --header "authorization: Bearer $token" "$PRISMA_CONSOLE_URL/api/v1/util/twistcli" -o /bin/twistcli
     chmod +x /bin/twistcli
-    /bin/twistcli images scan "$PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp" --address "$PRISMA_CONSOLE_URL" --details
+    /bin/twistcli images scan "$PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp" --address "$PRISMA_CONSOLE_URL" --details || ( rm -f /bin/twistcli && true )
+    rm -f /bin/twistcli
 else
     echo "==========================================================================================="
     echo "[WARN]: Image $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp is not scanned for vulnerabilities."
