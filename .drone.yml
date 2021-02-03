@@ -1,13 +1,30 @@
 pipeline:
+#   docker:
+#     image: plugins/docker:latest
+#     repo: joshdvir/drone-docker-bash
+#     tag:
+#       - "17.05"
+#       - "17"
+#       - "latest"
+#     force_tag: true
+#     file: Dockerfile
+#     secrets: [ docker_username, docker_password ]
+#     when:
+#       branch: [master]
+
   docker:
     image: plugins/docker:latest
-    repo: joshdvir/drone-docker-bash
+    deamon_off: true
+    registry: docker.twistbioscience-staging.com
+    repo: docker.twistbioscience-staging.com/drone-docker-bash
     tag:
-      - "17.05"
-      - "17"
+      - "${DRONE_COMMIT_BRANCH}"
       - "latest"
     force_tag: true
     file: Dockerfile
     secrets: [ docker_username, docker_password ]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     when:
-      branch: [master]
+      branch: [master, prisma]
+

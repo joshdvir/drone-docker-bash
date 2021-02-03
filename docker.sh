@@ -139,6 +139,24 @@ timestamp=$(cat $PLUGIN_DOCKERFILE | md5sum | awk '{print $1}')
 # Docker build image
 /usr/local/bin/docker build -t $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp -f $PLUGIN_DOCKERFILE $build_envs $PLUGIN_CONTEXT
 
+# If TWISTLOCK_USER and TWISTLOCK_PASSWORD is set, then download twistlock cli and scan for vulnerabilities in the image
+if [[ ! -z "${TWISTLOCK_USER}" && ! -z "${TWISTLOCK_PASSWORD}" && ! -z "${PRISMA_CONSOLE_URL}" ]]; then
+    echo "[INFO]: Getting Auth token for $TWISTLOCK_USER"
+    token=$(curl -s -H "Content-Type: application/json" -d "{\"username\":\"$TWISTLOCK_USER\", \"password\":\"$TWISTLOCK_PASSWORD\"}" "$PRISMA_CONSOLE_URL/api/v1/authenticate")
+    token=$(echo "$token" | jq -r ".token")
+    echo "[INFO]: Downloading twistcli tool from $PRISMA_CONSOLE_URL"
+    curl -s -L -k --header "authorization: Bearer $token" "$PRISMA_CONSOLE_URL/api/v1/util/twistcli" -o /bin/twistcli
+    chmod +x /bin/twistcli
+    /bin/twistcli images scan "$PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp" --address "$PRISMA_CONSOLE_URL" --details
+    rm -f /bin/twistcli
+else
+    echo "==========================================================================================="
+    echo "[WARN]: Image $PLUGIN_REPO:$DRONE_COMMIT_SHA-$timestamp is not scanned for vulnerabilities."
+    echo "[WARN]:    Set TWISTLOCK_USER, TWISTLOCK_PASSWORD, and PRISMA_CONSOLE_URL env varaibles in "
+    echo "[WARN]:    build secrets settings to enable this scan."
+    echo "==========================================================================================="
+fi
+
 IFS=',' read -r -a tags <<< "$PLUGIN_TAGS"
 for tag in "${tags[@]}"
 do
@@ -159,5 +177,16 @@ if [ "$keep" = true ] ; then
 fi
 
 echo "docker rmi -f $(docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}')"
-/usr/local/bin/docker rmi -f $(/usr/local/bin/docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}') | exit 0
-# /usr/local/bin/docker system prune -f | exit 0
+images=($(/usr/local/bin/docker images | grep '${PLUGIN_REPO}' | grep '<none>' | awk '{print $3}'))
+for image in "${images[@]}"
+do
+  /usr/local/bin/docker rmi -f $image
+done
+echo "docker rmi $(/usr/local/bin/docker images -a --filter dangling=true -q)"
+images=($(/usr/local/bin/docker images -a --filter dangling=true -q))
+for image in "${images[@]}"
+do
+  /usr/local/bin/docker rmi -f $image
+done
+echo "docker system prune -f"
+/usr/local/bin/docker system prune -f | exit 0
