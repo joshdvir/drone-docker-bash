@@ -29,3 +29,27 @@ Another example with optional variables
       aws_access_key_id: ewijdfmvbasciosvdfkl # optional, better to use as secret
       aws_secret_access_key: vdfklmnopenxasweiqokdvdfjeqwuioenajks # optional, better to use as secret
 ```
+
+Another example to scan images for vulnerabilities
+```yaml
+  docker:
+    image: docker.twistbioscience-staging.com/drone-docker-bash:latest
+    pull: true
+    registry: docker.twistbioscience-staging.com
+    repo: docker.twistbioscience-staging.com/mes-clu
+#     Set this environment variable if you want to scan but
+#     not publish to docker registry
+#     environment:
+#       - PLUGIN_DRY_RUN=true
+    tags:
+      - "${DRONE_COMMIT:0:8}.${DRONE_BUILD_NUMBER}.${DRONE_COMMIT_BRANCH}"
+    force_tag: true
+    dockerfile: Dockerfile
+    keep: 4
+    secrets: [ docker_username, docker_password, docker_email, prisma_console_url, twistlock_user, twistlock_password ]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    when:
+      branch: [master]
+      event: push
+```
