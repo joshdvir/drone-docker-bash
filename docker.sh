@@ -15,6 +15,10 @@ if [ -z ${DRONE_COMMIT_SHA} ]; then
   DRONE_COMMIT_SHA="00000000"
 fi
 
+if [ -z ${PLUGIN_NO_CACHE} ]; then
+  PLUGIN_NO_CACHE=false
+fi
+
 
 # Login env's
 # if [ -z ${PLUGIN_REGISTRY} ]; then
@@ -113,6 +117,10 @@ fi
 
 if [ ! -z ${PLUGIN_COMPRESS} ]; then
   build_envs="$build_envs --compress"
+fi
+
+if [ ! -z ${PLUGIN_NO_CACHE} ]; then
+  build_envs="$build_envs --no-cache"
 fi
 
 if [ -z ${PLUGIN_REPO} ]; then
